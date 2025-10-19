@@ -8,7 +8,15 @@
 import Foundation
 import UIKit
 
+protocol RMCharacterListViewViewModelDelegate: AnyObject {
+    func didLoadInitialCharacters()
+    func didSelectCharacter(_ character: RMCharacter)
+}
+
+// View model to handle character list view logic
 final class RMCharacterListViewViewModel: NSObject {
+    
+    public weak var delegate: RMCharacterListViewViewModelDelegate?
     
     private var characters: [RMCharacter] = [] {
         didSet {
@@ -16,13 +24,19 @@ final class RMCharacterListViewViewModel: NSObject {
                 let viewModel = RMCharacterCollectionViewCellViewModel(
                     characterName: character.name,
                     characterStatus: character.status,
-                    characterImageUrl: URL(string: character.image))
+                    characterImageUrl: URL(string: character.image)
+                )
+                cellViewModels.append(viewModel)
             }
         }
     }
     
     private var cellViewModels: [RMCharacterCollectionViewCellViewModel] = []
     
+    private var apiInfo: RMGetAllCharactersResponse.Info? = nil
+    
+    
+    //Fetch initial set of characters (20)
     public func fetchCharacters() {
         RMService.shared.execute(
             .listCharactersRequests,
@@ -31,7 +45,12 @@ final class RMCharacterListViewViewModel: NSObject {
             switch result {
             case .success(let responseModel):
                 let results = responseModel.results
+                let info = responseModel.info
                 self?.characters = results
+                self?.apiInfo = info
+                DispatchQueue.main.async {
+                    self?.delegate?.didLoadInitialCharacters()
+                }
                 //print("Example image URL: "+String(model.results.first?.image ?? "No Image"))
                 //print("Total: "+String(model.info.pages))
                 //print("Page result count: "+String(model.results.count))
@@ -40,11 +59,23 @@ final class RMCharacterListViewViewModel: NSObject {
             }
         }
     }
+    
+    //Paginate if additional characters are needed
+    public func fetchAddtionalChracters() {
+        // Fetch more characters
+    }
+    
+    public var shouldShowLoadMoreIndicator: Bool {
+        return apiInfo?.next != nil
+    }
+    
 }
+
+// MARK: - CollectionView
 
 extension RMCharacterListViewViewModel: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 20
+        return cellViewModels.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -54,10 +85,11 @@ extension RMCharacterListViewViewModel: UICollectionViewDataSource, UICollection
         ) as? RMCharacterCollectionViewCell else {
             fatalError("Unsupported cell")
         }
-        let viewModel = RMCharacterCollectionViewCellViewModel(
-            characterName: "Afraz",
-            characterStatus: .alive,
-            characterImageUrl: URL(string: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"))
+        let viewModel = cellViewModels[indexPath.row]
+//        let viewModel = RMCharacterCollectionViewCellViewModel(
+//            characterName: "Afraz",
+//            characterStatus: .alive,
+//            characterImageUrl: URL(string: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"))
         
         cell.configure(with: viewModel)
         return cell
@@ -68,5 +100,21 @@ extension RMCharacterListViewViewModel: UICollectionViewDataSource, UICollection
         let width = (bounds.width-30)/2
         return CGSize(
             width: width, height: width * 1.5)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let character = characters[indexPath.row]
+        delegate?.didSelectCharacter(character)
+    }
+}
+
+// MARK: - ScrollView
+extension RMCharacterListViewViewModel: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        //
+        guard shouldShowLoadMoreIndicator else {
+            return
+        }
     }
 }
