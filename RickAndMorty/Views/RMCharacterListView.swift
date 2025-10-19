@@ -36,6 +36,9 @@ final class RMCharacterListView: UIView {
         collectionView.alpha = 0 //alpha is opacity
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(RMCharacterCollectionViewCell.self, forCellWithReuseIdentifier: RMCharacterCollectionViewCell.cellIdentifier)
+        collectionView.register(RMFooterLoadingCollectionReusableView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: RMFooterLoadingCollectionReusableView.identifier)
         return collectionView
     }()
     
