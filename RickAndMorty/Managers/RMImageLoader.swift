@@ -22,7 +22,7 @@ final class RMImageLoader {
     public func downloadImage(_ url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
         let key = url.absoluteString as NSString
         if let data = imageDataCache.object(forKey: key) {
-            print("We're reading from the cache now instead of reloading data! \(key) :D")
+            //print("We're reading from the cache now instead of reloading data! \(key) :D")
             completion(.success(data as Data))
             //NSData == Data | NSString == String, just an FYI, complexity between Swift & Objective C
             return
