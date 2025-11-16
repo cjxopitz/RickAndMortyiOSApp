@@ -109,7 +109,9 @@ extension RMCharacterDetailsViewController: UICollectionViewDelegate, UICollecti
             ) as? RMCharacterEpisodeCollectionViewCell else {
                 fatalError("Could not dequeue cell")
             }
-            cell.configure(with: viewModels[indexPath.row])
+            let viewModel = viewModels[indexPath.row]
+            //print(viewModel)
+            cell.configure(with: viewModel)
             return cell
         }
     }
