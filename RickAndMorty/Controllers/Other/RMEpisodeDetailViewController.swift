@@ -10,13 +10,12 @@ import UIKit
 ///VC to show details about a single episode
 final class RMEpisodeDetailViewController: UIViewController {
     
-    private let url: URL?
+    private let viewModel: RMEpisodeDetailViewViewModel
     
     //MARK: - Init
     
     init(url: URL?) {
-        
-        self.url = url
+        self.viewModel = .init(endpointUrl: url)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -31,16 +30,5 @@ final class RMEpisodeDetailViewController: UIViewController {
         title = "Episode"
         view.backgroundColor = .systemGreen
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
