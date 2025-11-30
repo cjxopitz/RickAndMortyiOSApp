@@ -21,12 +21,27 @@ final class RMEpisodeListViewViewModel: NSObject {
     
     private var isLoadingMoreCharacters = false
     
+    private let borderColors: [UIColor] = [
+        .systemRed,
+        .systemBlue,
+        .systemOrange,
+        .systemPink,
+        .systemTeal,
+        .systemIndigo,
+        .systemPink,
+        .systemBrown,
+        .systemPurple,
+        .systemYellow,
+        .systemMint
+    ]
+    
     private var episodes: [RMEpisode] = [] {
         didSet {
             //print("Creating viewModels")
             for episode in episodes {
                 let viewModel = RMCharacterEpisodeCollectionViewCellViewModel(
-                    epidesodeDataUrl: URL(string: episode.url)
+                    epidesodeDataUrl: URL(string: episode.url),
+                    borderColor: borderColors.randomElement() ?? .systemBlue
                 )
                 if !cellViewModels.contains(viewModel) {
                     cellViewModels.append(viewModel)
@@ -164,11 +179,12 @@ extension RMEpisodeListViewViewModel: UICollectionViewDataSource, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let bounds = UIScreen.main.bounds
-        let width = (bounds.width-30)/2
+        let bounds = collectionView.bounds
+        let width = bounds.width-20
         return CGSize(
             width: width,
-            height: width * 0.8)
+            height: 100
+            )
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
