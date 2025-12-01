@@ -38,7 +38,7 @@ final class RMService {
             for: request.endpoint,
             url: request.url
         ) {
-            print("Using cached API response - OH WHAT A JOY :D")
+            //print("Using cached API response - OH WHAT A JOY :D")
             do {
                 let result = try JSONDecoder().decode(type.self, from: cachedData)
                 completion(.success(result))
