@@ -32,14 +32,22 @@ struct RMSettingsView: View {
                     }
                     Text(viewModel.title)
                         .padding(.leading, 10)
+                    
+                    Spacer()
+                    //Spacer makes it so it's table across the entirety of the horizontal stack, just not to the edge of the string/text
             }
                 .padding(.bottom, 10)
+                .onTapGesture {
+                    viewModel.onTapHandler(viewModel.type)
+                }
         }
     }
 }
 
 #Preview {
     RMSettingsView(viewModel: .init(cellViewModels: RMSettingsOption.allCases.compactMap({
-        return RMSettingsCellViewModel(type: $0)
+        return RMSettingsCellViewModel(type: $0) { option in
+            
+        }
     })))
 }
