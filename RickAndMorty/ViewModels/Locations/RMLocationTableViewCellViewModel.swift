@@ -6,10 +6,14 @@
 //
 
 import Foundation
+import UIKit
 
 struct RMLocationTableViewCellViewModel: Hashable, Equatable {
     
     private var location: RMLocation
+    
+    
+    //MARK: - Init
     
     init(location: RMLocation) {
         self.location = location
@@ -20,10 +24,13 @@ struct RMLocationTableViewCellViewModel: Hashable, Equatable {
     }
     
     public var type: String {
-        return location.type
+        return "Type: "+location.type
     }
     
     public var dimension: String {
+        if location.dimension == "unknown" {
+            return "Unknown dimension"
+        }
         return location.dimension
     }
     
