@@ -7,18 +7,41 @@
 
 import UIKit
 
+// Dyanmic search option view
+
+// Render results
+
+// Render no results zero state
+
+// Searching / API Call
+
 final class RMSearchViewController: UIViewController {
+    
+    ///CONFIGURATION FOR SEARCH SESSION
     
     struct Config {
         enum `Type` {
-            case character
-            case episode
-            case location
+            case character // allow name | status | gender
+            case episode // allow name searches only
+            case location // allow name | type searches
+            
+            var title: String {
+                switch self {
+                case .character:
+                    return "Search Characters"
+                case .episode:
+                    return "Search Episodes"
+                case .location:
+                    return "Search Locations"
+                }
+            }
         }
         let type: `Type`
     }
     
     private let config: Config
+    
+    // MARK: - Init
     
     init(config: Config) {
         self.config = config
@@ -29,9 +52,11 @@ final class RMSearchViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Search"
+        title = config.type.title
         view.backgroundColor = .systemBackground
     }
 }
