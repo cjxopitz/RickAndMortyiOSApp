@@ -25,6 +25,14 @@ final class RMSearchViewController: UIViewController {
             case episode // allow name searches only
             case location // allow name | type searches
             
+            var endpoint: RMEndpoint {
+                switch self {
+                case .character: return .character
+                case .episode: return .episode
+                case .location: return .location
+                }
+            }
+            
             var title: String {
                 switch self {
                 case .character:
