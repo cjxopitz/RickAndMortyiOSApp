@@ -96,9 +96,22 @@ extension RMSearchView: UICollectionViewDelegate, UICollectionViewDataSource {
 // MARK: - RMSearchInputViewDelegate
 
 extension RMSearchView: RMSearchInputViewDelegate {
+    
+    
     func rmSearchInputView(_ inputView: RMSearchInputView, didSelectOption option: RMSearchInputViewViewModel.DynamicOption) {
         delegate?.rmSearchView(self, didSelectOption: option)
+        
+        
     }
+    
+    func rmSearchInputView(_ inputView: RMSearchInputView, didChangeSearchText text: String) {
+        viewModel.set(query: text)
+    }
+    
+    func rmSearchInputViewDidTapKeyboardButton(_ inputVIew: RMSearchInputView) {
+        viewModel.executeSearch()
+    }
+    
 }
 
 // We're going to propogate the call up from the delegate to the extension?
