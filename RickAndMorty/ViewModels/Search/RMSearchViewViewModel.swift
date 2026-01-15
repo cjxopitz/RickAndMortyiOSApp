@@ -21,7 +21,7 @@ final class RMSearchViewViewModel {
     
     private var optionMapUpdateBlock: (((RMSearchInputViewViewModel.DynamicOption, String)) -> Void)?
     
-    private var searchResultHandler: (() -> Void)?
+    private var searchResultHandler: ((RMSearchResultViewModel) -> Void)?
     
     
     //MARK: - Init
@@ -32,13 +32,13 @@ final class RMSearchViewViewModel {
     
     //MARK: - Public
     
-    public func registerSearchResultHandler(_ block: @escaping () -> Void) {
+    public func registerSearchResultHandler(_ block: @escaping (RMSearchResultViewModel) -> Void) {
         self.searchResultHandler = block
     }
     
     public func executeSearch() {
         
-        print("Search text: \(searchText)")
+        //print("Search text: \(searchText)")
         
         //Build arguments
         var queryParams: [URLQueryItem] = [
@@ -58,16 +58,59 @@ final class RMSearchViewViewModel {
             queryParameters: queryParams
         )
         
-        print(request.url?.absoluteString)
-        
-        RMService.shared.execute(request, expecting: RMGetAllCharactersResponse.self) { result in
+        switch config.type.endpoint {
+        case .character:
+            makeSearchAPICall(RMGetAllCharactersResponse.self, request: request)
+        case .location:
+            makeSearchAPICall(RMGetAllLocationsResponse.self, request: request)
+        case .episode:
+            makeSearchAPICall(RMGetAllEpisodesResponse.self, request: request)
+        }
+    }
+    
+    private func makeSearchAPICall<T: Codable>(_ type: T.Type, request: RMRequest) {
+        RMService.shared.execute(request, expecting: type) { result in
             //Notify view of results, no results, or error
             switch result {
             case .success(let model):
-                print("Search results founds: \(model.results.count)")
+                //In video the self below is optional...  Doesn't compile when made so here...
+                self.processSearchResults(model: model)
             case .failure:
+                print("That straight up ain't working, homie")
                 break
             }
+        }
+    }
+    
+    private func processSearchResults(model: Codable) {
+        var resultsVM: RMSearchResultViewModel?
+        if let characterResults = model as? RMGetAllCharactersResponse {
+            resultsVM = .characters(characterResults.results.compactMap({
+                return RMCharacterCollectionViewCellViewModel(
+                    characterName: $0.name,
+                    characterStatus: $0.status,
+                    characterImageUrl: URL(string: $0.image)
+                )
+            }))
+        }
+        
+        else if let episodesResults = model as? RMGetAllEpisodesResponse {
+            resultsVM = .episodes(episodesResults.results.compactMap({
+                return RMCharacterEpisodeCollectionViewCellViewModel(
+                    epidesodeDataUrl: URL(string: $0.url)
+                )
+            }))
+        }
+        
+        else if let locationsResults = model as? RMGetAllLocationsResponse {
+            resultsVM = .locations(locationsResults.results.compactMap({
+                return RMLocationTableViewCellViewModel(location: $0)
+            }))
+        }
+        if let results = resultsVM {
+            self.searchResultHandler?(results)
+        } else {
+            // fallback error
         }
     }
     
@@ -85,3 +128,45 @@ final class RMSearchViewViewModel {
         self.optionMapUpdateBlock = block
     }
 }
+
+/*
+ 
+ switch config.type.endpoint {
+ case .character:
+     RMService.shared.execute(request, expecting: RMGetAllCharactersResponse.self) { result in
+         //Notify view of results, no results, or error
+         switch result {
+         case .success(let model):
+             print("Search results found: \(model.results.count)")
+             
+             //Episodes & Characters: CollectionView
+             
+             //Locations: TableView
+             
+         case .failure:
+             print("That straight up ain't working, homie")
+             break
+         }
+     }
+ case .episode:
+     RMService.shared.execute(request, expecting: RMGetAllEpisodesResponse.self) { result in
+         //Notify view of results, no results, or error
+         switch result {
+         case .success(let model):
+             print("Search results found: \(model.results.count)")
+             
+             //Episodes & Characters: CollectionView
+             
+             //Locations: TableView
+             
+         case .failure:
+             print("That straight up ain't working, homie")
+             break
+         }
+     }
+ case .location:
+     break
+     //YANK THAT LATER, just added the break so this shit will leave off compiling
+
+ }
+ */
