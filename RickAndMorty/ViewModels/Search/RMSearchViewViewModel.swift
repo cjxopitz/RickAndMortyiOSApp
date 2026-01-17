@@ -23,6 +23,8 @@ final class RMSearchViewViewModel {
     
     private var searchResultHandler: ((RMSearchResultViewModel) -> Void)?
     
+    private var noResultsHandler: (() -> Void)?
+    
     
     //MARK: - Init
     
@@ -34,6 +36,10 @@ final class RMSearchViewViewModel {
     
     public func registerSearchResultHandler(_ block: @escaping (RMSearchResultViewModel) -> Void) {
         self.searchResultHandler = block
+    }
+    
+    public func registerNoResultsHandler(_ block: @escaping () -> Void) {
+        self.noResultsHandler = block
     }
     
     public func executeSearch() {
@@ -76,7 +82,9 @@ final class RMSearchViewViewModel {
                 //In video the self below is optional...  Doesn't compile when made so here...
                 self.processSearchResults(model: model)
             case .failure:
-                print("That straight up ain't working, homie")
+                //print("That straight up ain't working, homie")
+                //Same issue as above, this should be an optional below self?.handleNoResults()
+                self.handleNoResults()
                 break
             }
         }
@@ -111,7 +119,12 @@ final class RMSearchViewViewModel {
             self.searchResultHandler?(results)
         } else {
             // fallback error
+            handleNoResults()
         }
+    }
+    
+    private func handleNoResults() {
+        noResultsHandler?()
     }
     
     public func set(query text: String) {
