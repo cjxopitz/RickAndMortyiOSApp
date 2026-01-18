@@ -25,6 +25,8 @@ final class RMSearchViewViewModel {
     
     private var noResultsHandler: (() -> Void)?
     
+    private var searchResultModel: Codable?
+    
     
     //MARK: - Init
     
@@ -116,6 +118,7 @@ final class RMSearchViewViewModel {
             }))
         }
         if let results = resultsVM {
+            self.searchResultModel = model
             self.searchResultHandler?(results)
         } else {
             // fallback error
@@ -140,46 +143,12 @@ final class RMSearchViewViewModel {
     public func registerOptionChangeBlock(_ block: @escaping ((RMSearchInputViewViewModel.DynamicOption, String)) -> Void) {
         self.optionMapUpdateBlock = block
     }
+    
+    public func locationSearchResult(at index: Int) -> RMLocation? {
+        guard let searchModel = searchResultModel as? RMGetAllLocationsResponse else {
+            return nil
+        }
+        return searchModel.results[index]
+    }
+    
 }
-
-/*
- 
- switch config.type.endpoint {
- case .character:
-     RMService.shared.execute(request, expecting: RMGetAllCharactersResponse.self) { result in
-         //Notify view of results, no results, or error
-         switch result {
-         case .success(let model):
-             print("Search results found: \(model.results.count)")
-             
-             //Episodes & Characters: CollectionView
-             
-             //Locations: TableView
-             
-         case .failure:
-             print("That straight up ain't working, homie")
-             break
-         }
-     }
- case .episode:
-     RMService.shared.execute(request, expecting: RMGetAllEpisodesResponse.self) { result in
-         //Notify view of results, no results, or error
-         switch result {
-         case .success(let model):
-             print("Search results found: \(model.results.count)")
-             
-             //Episodes & Characters: CollectionView
-             
-             //Locations: TableView
-             
-         case .failure:
-             print("That straight up ain't working, homie")
-             break
-         }
-     }
- case .location:
-     break
-     //YANK THAT LATER, just added the break so this shit will leave off compiling
-
- }
- */
