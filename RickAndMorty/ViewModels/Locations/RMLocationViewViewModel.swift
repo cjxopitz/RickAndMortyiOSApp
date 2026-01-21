@@ -32,8 +32,59 @@ final class RMLocationViewViewModel {
     
     public private(set) var cellViewModels: [RMLocationTableViewCellViewModel] = []
     
-    init() {
+    public var shouldShowLoadMoreIndicator: Bool {
+        return apiInfo?.next != nil
+    }
+    
+    public var isLoadingMoreLocations = false
+    
+    //MARK: - Init
+    
+    init() {}
+    
+    ///Paginate if additional locations are needed
+    public func fetchAdditionalLocations() {
         
+        guard !isLoadingMoreLocations else {
+            return
+        }
+        
+        guard let nextUrlString = apiInfo?.next,
+              let url = URL(string: nextUrlString) else {
+            return
+        }
+        
+        isLoadingMoreLocations = true
+        //print("Fetching more characters meow")
+
+        guard let request = RMRequest(url: url) else {
+            isLoadingMoreLocations = false
+            print("Failed to create request")
+            return
+        }
+        
+        RMService.shared.execute(request, expecting: RMGetAllLocationsResponse.self) { [weak self] result in
+            guard let strongSelf = self else {
+                return
+            }
+            switch result {
+            case .success(let responseModel):
+                //print("Pre-update: \(strongSelf.cellViewModels.count)")
+                let moreResults = responseModel.results
+                let info = responseModel.info
+                print("More locations: \(moreResults.count)")
+                strongSelf.apiInfo = info
+                strongSelf.cellViewModels.append(contentsOf: moreResults.compactMap({
+                    return RMLocationTableViewCellViewModel(location: $0)
+                }))
+                DispatchQueue.main.async {
+                    strongSelf.isLoadingMoreLocations = false
+                }
+            case .failure(let failure):
+                print(String(describing: failure))
+                self?.isLoadingMoreLocations = false
+            }
+        }
     }
     
     public func location(at index: Int) -> RMLocation? {
@@ -58,6 +109,7 @@ final class RMLocationViewViewModel {
                 }
                 
             case .failure(let error):
+                // TODO LIST - GOTTA HANDLE THIS ERROR, BRUH
                 break
             }
         }
