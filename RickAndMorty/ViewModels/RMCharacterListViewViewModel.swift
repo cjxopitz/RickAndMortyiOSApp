@@ -166,10 +166,20 @@ extension RMCharacterListViewViewModel: UICollectionViewDataSource, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let bounds = UIScreen.main.bounds
-        let width = (bounds.width-30)/2
+        //TODO: Abstract to an extension so we don't have to do janky conditionals everywhere...  But I LIKE janky conditionals... :(
+        let isIphone = UIDevice.current.userInterfaceIdiom == .phone
+        
+        let bounds = collectionView.bounds
+        let width: CGFloat
+        if isIphone {
+            width = (bounds.width-30)/2
+        } else {
+            // mac | iPad
+            width = (bounds.width-50)/4
+        }
         return CGSize(
-            width: width, height: width * 1.5
+            width: width,
+            height: width * 1.5
         )
     }
     
